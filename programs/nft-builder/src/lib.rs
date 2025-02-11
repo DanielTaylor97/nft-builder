@@ -14,8 +14,6 @@ use constants::*;
 use utils::*;
 
 declare_id!("4U9DWTw7de8At9rAXZuF4pEpiT4MiPQMQAz9UHXaumKF");
-// locelnet deploy: 45YnEk4R6BB3ATtP8Qt5v6EEDz6m7WxgqpfZk1JK2cho
-// Original: 4U9DWTw7de8At9rAXZuF4pEpiT4MiPQMQAz9UHXaumKF
 
 #[program]
 pub mod nft_builder {
