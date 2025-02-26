@@ -1,7 +1,7 @@
 import './globals.css'
-import {ClusterProvider} from '@/components/cluster/cluster-data-access'
-import {SolanaProvider} from '@/components/solana/solana-provider'
-import {UiLayout} from '@/components/ui/ui-layout'
+import {ClusterProvider} from '../components/cluster/cluster-data-access'
+import {SolanaProvider} from '../components/solana/solana-provider'
+import {UiLayout} from '../components/ui/ui-layout'
 import {ReactQueryProvider} from './react-query-provider'
 
 export const metadata = {
@@ -12,7 +12,7 @@ export const metadata = {
 const links: { label: string; path: string }[] = [
   { label: 'Account', path: '/account' },
   { label: 'Clusters', path: '/clusters' },
-  { label: 'Basic Program', path: '/basic' },
+  // { label: 'Build NFT', path: '/nft_builder' },
 ]
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

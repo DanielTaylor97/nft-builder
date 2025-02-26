@@ -1,5 +1,5 @@
-import DashboardFeature from '@/components/dashboard/dashboard-feature'
+import NftBuilderFeature from "../components/nft_builder/nft-builder-feature"//'@/components/dashboard/dashboard-feature'
 
 export default function Page() {
-  return <DashboardFeature />
+  return <NftBuilderFeature />  // DashboardFeature
 }

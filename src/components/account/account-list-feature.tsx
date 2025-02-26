@@ -2,11 +2,12 @@
 
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletButton } from '../solana/solana-provider'
+import React from 'react'
 
 import { redirect } from 'next/navigation'
 
 export default function AccountListFeature() {
-  const { publicKey } = useWallet()
+  const { publicKey } = useWallet();
 
   if (publicKey) {
     return redirect(`/account/${publicKey.toString()}`)
