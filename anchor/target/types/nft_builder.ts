@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/nft_builder.json`.
  */
 export type NftBuilder = {
-  "address": "",
+  "address": "7xwq59rxNYiiJRZ38HA8Pb1mPh8AmQxfTCuSPBhqEmrn",
   "metadata": {
     "name": "nftBuilder",
     "version": "0.1.0",

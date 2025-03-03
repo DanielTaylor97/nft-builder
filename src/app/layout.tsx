@@ -12,7 +12,6 @@ export const metadata = {
 const links: { label: string; path: string }[] = [
   { label: 'Account', path: '/account' },
   { label: 'Clusters', path: '/clusters' },
-  // { label: 'Build NFT', path: '/nft_builder' },
 ]
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

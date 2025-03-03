@@ -1,33 +1,39 @@
-import WebIrys from "@Irys/sdk";
-import { WalletContextState } from "@solana/wallet-adapter-react";
-import { Cluster } from '../../cluster/cluster-data-access'
+
+import { WebUploader } from "@irys/web-upload"
+import { WebSolana } from "@irys/web-upload-solana"
+import { BaseWebIrys } from "@irys/web-upload/dist/types/base";
+import type { FundResponse, UploadResponse } from '@irys/upload-core/dist/types/types'
+import { WalletContextState } from '@solana/wallet-adapter-react'
+import { Cluster, ClusterNetwork } from '../../cluster/cluster-data-access'
 import fs from 'fs';
-import { FundResponse, UploadResponse } from "@Irys/sdk/build/cjs/common/types";
 
 export const getIrys = async (
     cluster: Cluster,
-    solanaWallet: WalletContextState
-): Promise<WebIrys> => {
+    wallet: WalletContextState
+): Promise<BaseWebIrys> => {
 
-    // Optional
-    const rpcUrl = "";
-    // const wallet = { rpcUrl: rpcUrl, name: "solana", provider: solanaWallet };
+    try {
 
-    const webIrys = new WebIrys({
-        network: cluster.endpoint,
-        token: "solana",
-        // wallet
-        key: process.env.PRIVATE_KEY,
-        // config: { providerUrl }
-    });
+        if(cluster.endpoint === ClusterNetwork.Devnet) {
+            const irysUploader = await WebUploader(WebSolana)
+                                        .withProvider(wallet)
+                                        .withRpc(cluster.endpoint)
+                                        .devnet();
 
-    await webIrys.ready();
-
-    return webIrys;
+            return irysUploader;
+        } else {
+            const irysUploader = await WebUploader(WebSolana)
+                                        .withProvider(wallet);
+    
+            return irysUploader;
+        }
+    } catch (error) {
+        throw new Error(`Error while creating the Irys instance: ${error.message}`);
+    }
 };
 
 export const upfrontFundNode = async (
-    irysInstance: WebIrys,
+    irysInstance: BaseWebIrys,
     amount: number,
 ): Promise<FundResponse> => {
     try{
@@ -40,7 +46,7 @@ export const upfrontFundNode = async (
 };
 
 export const lazyFundNode = async (
-    irysInstance: WebIrys,
+    irysInstance: BaseWebIrys,
     pathToFile: string,
 ): Promise<FundResponse> => {
     try{
@@ -55,30 +61,30 @@ export const lazyFundNode = async (
 }
 
 export const uploadData = async (
-    irysInstance: WebIrys,
+    irysInstance: BaseWebIrys,
     dataToUpload: string,
     tags: {name: string, value: string}[]
 ): Promise<UploadResponse> => {
 
     try {
         const receipt = await irysInstance.upload(dataToUpload, { tags: tags });
-        console.log(`Data uploaded to https://gateway.irys.xyz/${receipt.id}`);
+        
         return receipt;
-    } catch(err) {
-        console.log("Error uploading data: ", err);
+    } catch(error) {
+        throw new Error(`Error uploading data to Irys: ${error.message}`);
     }
 }
 
 export const uploadFile = async (
-    irysInstance: WebIrys,
-    tempLoc: string,
+    irysInstance: BaseWebIrys,
+    file: File,
     tags: {name: string, value: string}[]
 ): Promise<UploadResponse> => {
     try {
-        const receipt = await irysInstance.uploadFile(tempLoc, { tags: tags });
+        const receipt = await irysInstance.uploadFile(file, { tags: tags });
         console.log(`File uploaded to https://gateway.irys.xyz/${receipt.id}`);
         return receipt;
-    } catch (err) {
-        console.log("Error uploading file: ", err);
+    } catch (error) {
+        throw new Error(`Error uploading file to Irys: ${error.message}`);
     }
 };

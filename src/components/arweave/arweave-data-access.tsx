@@ -1,18 +1,13 @@
 'use client'
 
-import { useMutation, useQuery } from '@tanstack/react-query'
 import { metadata } from './metadata-creator'
-import { getIrys, uploadData as uploadDataToIrys, uploadFile } from './irys/utils'
+import { uploadData as uploadDataToIrys, uploadFile } from './irys/utils'
 
-import toast from 'react-hot-toast'
-import { useCluster } from '../cluster/cluster-data-access'
-import { useTransactionToast } from '../ui/ui-layout'
-import { UploadResponse } from '@Irys/sdk/build/cjs/common/types'
-import WebIrys from '@Irys/sdk'
-import { WalletContextState } from '@solana/wallet-adapter-react'
+import type { UploadResponse } from '@irys/upload-core/dist/types/types'
 import { writeFileSync } from 'fs'
 import { join } from 'path'
 import { unlink, readdir } from 'fs/promises'
+import BaseWebIrys from '@irys/web-upload/dist/types/base'
 
 const DIRECTORY: string = "../../temp";
 
@@ -22,85 +17,46 @@ export type FileInfo = {
     fileHash: string;
 }
 
-export function useArweaveProgram(
-    { wallet }:
-    { wallet: WalletContextState }
-) {
-    
-    const { cluster } = useCluster();
-    const irys = getIrys(cluster, wallet);
-    const transactionToast = useTransactionToast();
-
-    const uploadData = useMutation(
-        {
-            // mutationKey: ['', { cluster }],
-            mutationFn: () => uploadDataFn(irys),
-            onSuccess: ({ dataUploadResult, fileInfo }: { dataUploadResult: UploadResponse; fileInfo: FileInfo; }) => {
-              transactionToast(dataUploadResult.id);
-            },
-            onError: (err) => toast.error(`Failed to upload the file to Arweave: ${err.message}`),
-        }
-    );
-
-    const createAndUploadMetadataPage = useMutation<UploadResponse, Error, any>(
-        {
-            // mutationKey: ['', { cluster }],
-            mutationFn: ({
-                tokenCreationSignature,
-                fileInfo,
-                fileLocation,
-                // nftTimestamp,
-                creator
-            }) => createAndUploadMetadataPageFn(irys, tokenCreationSignature, fileInfo, fileLocation, creator),
-            onSuccess: (response: UploadResponse) => {
-              transactionToast(response.id);
-            },
-            onError: (err: Error) => toast.error(`Failed to upload the token Metadata to Arweave: ${err.message}`),
-        }
-    );
-
-    return {
-        uploadData,
-        createAndUploadMetadataPage,
-    };
-}
-
-async function uploadDataFn(
-    irysInstancePromise: Promise<WebIrys>
+export async function uploadDataFn(
+    irysInstancePromise: Promise<BaseWebIrys>
 ): Promise<{ dataUploadResult: UploadResponse; fileInfo: FileInfo; }> {
 
-    const irysInstance = await irysInstancePromise;
+    try {
+        const irysInstance = await irysInstancePromise;
 
-    const dataToUpload = "This is the data";
+        const dataToUpload = "This is the data";
 
-    const fileInfo: FileInfo = {
-        fileType: "",
-        fileSizeKb: 20,
-        fileHash: ""
-    };
+        const fileInfo: FileInfo = {
+            fileType: "",
+            fileSizeKb: 20,
+            fileHash: ""
+        };
 
-    const tags = [
-    {
-        name: "App-name",
-        value: "Authensus",
-    },
-    {
-        name: "Verison",
-        value: "0.0.1",
-    },
-    {
-        name: "Type",
-        value: "text",
-    },
-   ]
+        const tags = [
+            {
+                name: "App-name",
+                value: "Authensus",
+            },
+            {
+                name: "Verison",
+                value: "0.0.1",
+            },
+            {
+                name: "Type",
+                value: "text",
+            },
+        ]
 
-   // Completes the data upload and awaits the result, such that the file is available at https://gateway.irys.xyz/<result.id>
-   const dataUploadResult = await uploadDataToIrys(irysInstance, dataToUpload, tags);
+        // Completes the data upload and awaits the result, such that the file is available at https://gateway.irys.xyz/<result.id>
+        const dataUploadResult = await uploadDataToIrys(irysInstance, dataToUpload, tags);
 
-    return {
-        dataUploadResult,
-        fileInfo
-    };
+        return {
+            dataUploadResult,
+            fileInfo
+        };
+    } catch(error) {
+        throw new Error(`Error while uploading the data: ${error.message}`);
+    }
 
     /*
         response = {
@@ -118,58 +74,61 @@ async function uploadDataFn(
 
 }
 
-async function createAndUploadMetadataPageFn(
-    irysInstancePromise: Promise<WebIrys>,
+export async function createAndUploadMetadataPageFn(
+    irysInstancePromise: Promise<BaseWebIrys>,
     tokenCreationSignature: string,
     fileInfo: FileInfo,
     fileLocation: string,
+    mintPk: string,
     // nftTimestamp: string,
     creator: string
 ): Promise<UploadResponse> {
 
-    let irysInstance = await irysInstancePromise;
+    try {
+        let irysInstance = await irysInstancePromise;
 
-    let metadataString = metadata(
-        tokenCreationSignature,
-        fileInfo.fileType,
-        fileInfo.fileSizeKb,
-        fileInfo.fileHash,
-        fileLocation,
-        // nftTimestamp,
-        creator
-    );
+        let metadataString = metadata(
+            tokenCreationSignature,
+            fileInfo.fileType,
+            fileInfo.fileSizeKb,
+            fileInfo.fileHash,
+            fileLocation,
+            // nftTimestamp,
+            creator
+        );
 
-    const tags = [
-     {
-        name: "App-name",
-        value: "Authensus",
-     },
-     {
-        name: "Verison",
-        value: "1.0.0",
-     },
-     {
-        name: "Type",
-        value: "JSON",
-     },
-    ];
+        const tags = [
+        {
+            name: "App-name",
+            value: "Authensus",
+        },
+        {
+            name: "Verison",
+            value: "1.0.0",
+        },
+        {
+            name: "Type",
+            value: "JSON",
+        },
+        ];
 
-    const tempLoc = join(DIRECTORY, "metadata.json");
+        const file = new File([], `${mintPk}_metadata.json`, {type: "application/json"});
 
-    await clearFolder();
+        const dataUploadResult = await uploadFile(irysInstance, file, tags);
 
-    writeFileSync(tempLoc, metadataString);
-
-    const dataUploadResult = await uploadFile(irysInstance, tempLoc, tags);
-
-    await clearFolder();
-
-    return dataUploadResult;
+        return dataUploadResult;
+    } catch(error) {
+        throw new Error(`Error while creating and uploading metadata file: ${error.message}`);
+    }
 
 }
 
 async function clearFolder() {
-    for (const file of await readdir(DIRECTORY)) {
-        await unlink(join(DIRECTORY, file));
+    try {
+        for (const file of await readdir(DIRECTORY)) {
+            await unlink(join(DIRECTORY, file));
+        }
+    } catch(error) {
+        throw new Error(`Error while clearing folder: ${error.message}`);
     }
 }

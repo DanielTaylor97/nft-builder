@@ -1,5 +1,5 @@
-import NftBuilderFeature from "../components/nft_builder/nft-builder-feature"//'@/components/dashboard/dashboard-feature'
+import AuthensusFeature from "../components/authensus/authensus-feature"
 
 export default function Page() {
-  return <NftBuilderFeature />  // DashboardFeature
+  return <AuthensusFeature /> 
 }
