@@ -7,12 +7,6 @@ import { AuthensusCreate } from './authensus-ui';
 
 export default function AuthensusFeature() {
 
-  const name: string = "Stand-in Name";
-  const symbol: string = "STD";
-  const uri: string = "https://temp-uri.json/";
-  const verified: boolean = false;
-  const share: number = 100;
-
   const wallet = useWallet();
 
   if (wallet.publicKey) {
@@ -24,7 +18,7 @@ export default function AuthensusFeature() {
             title="Authensus"
             subtitle={"Add a file and Authensise it"}
           >
-            <AuthensusCreate name={name} symbol={symbol} uri={uri} wallet={wallet} verified={verified} share={share} />
+            <AuthensusCreate wallet={wallet} />
           </AppHero>
         </div>
       </div>

@@ -6,6 +6,7 @@ import type { FundResponse, UploadResponse } from '@irys/upload-core/dist/types/
 import { WalletContextState } from '@solana/wallet-adapter-react'
 import { Cluster, ClusterNetwork } from '../../cluster/cluster-data-access'
 import fs from 'fs';
+import { type BigNumber, BigNumber as BN } from 'bignumber.js';
 
 export const getIrys = async (
     cluster: Cluster,
@@ -32,13 +33,52 @@ export const getIrys = async (
     }
 };
 
-export const upfrontFundNode = async (
+const fundsNeeded = async (
     irysInstance: BaseWebIrys,
-    amount: number,
+    cost: BigNumber
+): Promise<BigNumber> => {
+    try {
+        const balance = await getIrysBalance(irysInstance);
+        const difference = (balance > cost) ? new BN(0) : cost.minus(balance);
+
+        return difference;
+    } catch(error) {
+        throw new Error(`Error while calculating funds needed: ${error}`);
+    }
+}
+
+export const getIrysBalance = async (irysInstance: BaseWebIrys): Promise<BigNumber> => {
+    try {
+        const balance = irysInstance.getBalance();
+
+        // In atomic units
+        return balance;
+    } catch (error) {
+        throw new Error(`Error while getting the balance: ${error.message}`);
+    }
+}
+
+export const upfrontFundNodeConditional = async (
+    irysInstance: BaseWebIrys,
+    amount: BigNumber,
 ): Promise<FundResponse> => {
     try{
-        const fundTx = await irysInstance.fund(irysInstance.utils.toAtomic(amount));
-        console.log(`Successfully funded ${irysInstance.utils.fromAtomic(fundTx.quantity)}${irysInstance.token}`);
+        const fundingAmount = await fundsNeeded(irysInstance, amount);
+        const fundTx = await upfrontFundNode(irysInstance, fundingAmount);
+
+        return fundTx;
+    } catch(err) {
+        console.log("Error funding the node conditionally: ", err);
+    }
+};
+
+export const upfrontFundNode = async (
+    irysInstance: BaseWebIrys,
+    amount: BigNumber,
+): Promise<FundResponse> => {
+    try{
+        const fundTx = await irysInstance.fund(amount);
+
         return fundTx;
     } catch(err) {
         console.log("Error funding the node: ", err);

@@ -1,35 +1,38 @@
 'use client'
 
 import { metadata } from './metadata-creator'
-import { uploadData as uploadDataToIrys, uploadFile } from './irys/utils'
+import { upfrontFundNodeConditional, uploadFile } from './irys/utils'
 
 import type { UploadResponse } from '@irys/upload-core/dist/types/types'
-import { writeFileSync } from 'fs'
 import { join } from 'path'
 import { unlink, readdir } from 'fs/promises'
 import BaseWebIrys from '@irys/web-upload/dist/types/base'
+import keccak256 from 'keccak256'
+import { Buffer } from 'node:buffer'
 
 const DIRECTORY: string = "../../temp";
 
 export type FileInfo = {
     fileType: string;
-    fileSizeKb: number;
+    fileSize: number;
     fileHash: string;
 }
 
 export async function uploadDataFn(
-    irysInstancePromise: Promise<BaseWebIrys>
+    irysInstancePromise: Promise<BaseWebIrys>,
+    file: File
 ): Promise<{ dataUploadResult: UploadResponse; fileInfo: FileInfo; }> {
 
     try {
         const irysInstance = await irysInstancePromise;
 
-        const dataToUpload = "This is the data";
+        const fileBuffer = Buffer.from(await file.arrayBuffer());
+        const fileHash = keccak256(fileBuffer);
 
         const fileInfo: FileInfo = {
-            fileType: "",
-            fileSizeKb: 20,
-            fileHash: ""
+            fileType: file.type,
+            fileSize: file.size,
+            fileHash: fileHash.toString('hex')
         };
 
         const tags = [
@@ -42,13 +45,17 @@ export async function uploadDataFn(
                 value: "0.0.1",
             },
             {
-                name: "Type",
-                value: "text",
+                name: "Content-Type",
+                value: file.type,
             },
-        ]
+        ];
+
+        const amount = await irysInstance.getPrice(file.size);
+
+        await upfrontFundNodeConditional(irysInstance, amount);
 
         // Completes the data upload and awaits the result, such that the file is available at https://gateway.irys.xyz/<result.id>
-        const dataUploadResult = await uploadDataToIrys(irysInstance, dataToUpload, tags);
+        const dataUploadResult = await uploadFile(irysInstance, file, tags);
 
         return {
             dataUploadResult,
@@ -57,21 +64,6 @@ export async function uploadDataFn(
     } catch(error) {
         throw new Error(`Error while uploading the data: ${error.message}`);
     }
-
-    /*
-        response = {
-            id, // Transaction id (used to download the data)
-            timestamp, // Timestamp (UNIX milliseconds) of when the transaction was created and verified
-            version, // The version of this JSON file, currently 1.0.0
-            public, // Public key of the bundler node used
-            signature, // A signed deep hash of the JSON receipt
-            deadlineHeight, // The block number by which the transaction must be finalized on Arweave
-            block, // Deprecated
-            validatorSignatures, // Deprecated
-            verify, // An async function used to verify the receipt at any time
-        }
-     */
-
 }
 
 export async function createAndUploadMetadataPageFn(
@@ -90,7 +82,7 @@ export async function createAndUploadMetadataPageFn(
         let metadataString = metadata(
             tokenCreationSignature,
             fileInfo.fileType,
-            fileInfo.fileSizeKb,
+            fileInfo.fileSize,
             fileInfo.fileHash,
             fileLocation,
             // nftTimestamp,
@@ -107,12 +99,17 @@ export async function createAndUploadMetadataPageFn(
             value: "1.0.0",
         },
         {
-            name: "Type",
-            value: "JSON",
+            name: "Content-Type",
+            value: "application/json",
         },
         ];
 
-        const file = new File([], `${mintPk}_metadata.json`, {type: "application/json"});
+        const file = new File([metadataString], `${mintPk}_metadata.json`, {type: "application/json"});
+
+        // No further conversion needed as the file.size is in bytes, as needed by the function: https://developer.mozilla.org/docs/Web/API/Blob/size
+        const amount = await irysInstance.getPrice(file.size);
+
+        await upfrontFundNodeConditional(irysInstance, amount);
 
         const dataUploadResult = await uploadFile(irysInstance, file, tags);
 
