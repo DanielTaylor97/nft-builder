@@ -9,15 +9,15 @@ export const metadata = (
 ) => {
     const metadataStr: string = 
 `{
-    "arweave-file-location": ${fileLocation},
+    "irys-file-location": "${fileLocation}",
     "data": {
-        "type": ${fileType},
-        "file-size-kb": ${fileSizeKb},
-        "file-hash": ${fileHash},
+        "type": "${fileType}",
+        "file-size-bytes": "${fileSizeKb}",
+        "file-hash": "${fileHash}",
     },
     "nft-data": {
-        "creation-transaction": ${tokenCreationSignature},
-        "creator-account": ${creator},
+        "creation-transaction": "${tokenCreationSignature}",
+        "creator-account": "${creator}",
     }
 }`;
     // "timestamp": ${nftTimestamp},

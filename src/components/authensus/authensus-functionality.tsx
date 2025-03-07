@@ -26,8 +26,8 @@ export function useAuthensusFunctionality() {
 
     const authensise = useMutation<AuthensusResult, Error, any>({
         mutationFn: ({ files, wallet, cluster, provider }) => authensus(files, wallet, cluster, provider),
-        onSuccess: ({ mintSignature, dataUploadResult, metadataUploadResult, editSignature }) => {
-            authensusToast(editSignature);
+        onSuccess: ({ mintSignature }) => {
+            authensusToast(mintSignature);
         },
         onError: (error) => {
             toast.error(`Authensus process failed with error ${error}`);
@@ -103,7 +103,7 @@ const getFileInfo = (file: File, wallet: WalletContextState): MintRpcObject => {
         ];
 
         const fileInfo: MintRpcObject = {
-            name: file.name,
+            name: file.name.length > 10 ? file.name.substring(0, 10) : file.name,
             symbol: symbolise(wallet.publicKey, file.name.length > 0 ? file.name : "file"),
             uri: "http://temp-uri.json",
             creators: creators

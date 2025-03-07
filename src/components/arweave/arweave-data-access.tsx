@@ -50,9 +50,12 @@ export async function uploadDataFn(
             },
         ];
 
-        const amount = await irysInstance.getPrice(file.size);
+        // Only need to fund the node for transactions > 100kB -- anything less is free on Irys
+        if(file.size > 100*1000) {
+            const amount = await irysInstance.getPrice(file.size);
 
-        await upfrontFundNodeConditional(irysInstance, amount);
+            await upfrontFundNodeConditional(irysInstance, amount);
+        }
 
         // Completes the data upload and awaits the result, such that the file is available at https://gateway.irys.xyz/<result.id>
         const dataUploadResult = await uploadFile(irysInstance, file, tags);
@@ -106,10 +109,13 @@ export async function createAndUploadMetadataPageFn(
 
         const file = new File([metadataString], `${mintPk}_metadata.json`, {type: "application/json"});
 
-        // No further conversion needed as the file.size is in bytes, as needed by the function: https://developer.mozilla.org/docs/Web/API/Blob/size
-        const amount = await irysInstance.getPrice(file.size);
+        // Only need to fund the node for transactions > 100kB -- anything less is free on Irys
+        if(file.size > 100*1000) {
+            // No further conversion needed as the file.size is in bytes, as needed by the function: https://developer.mozilla.org/docs/Web/API/Blob/size
+            const amount = await irysInstance.getPrice(file.size);
 
-        await upfrontFundNodeConditional(irysInstance, amount);
+            await upfrontFundNodeConditional(irysInstance, amount);
+        }
 
         const dataUploadResult = await uploadFile(irysInstance, file, tags);
 

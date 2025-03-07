@@ -8,6 +8,8 @@ import { Cluster, ClusterNetwork } from '../../cluster/cluster-data-access'
 import fs from 'fs';
 import { type BigNumber, BigNumber as BN } from 'bignumber.js';
 
+const BIG_NUMBER_ZERO = new BN(0);
+
 export const getIrys = async (
     cluster: Cluster,
     wallet: WalletContextState
@@ -38,10 +40,10 @@ const fundsNeeded = async (
     cost: BigNumber
 ): Promise<BigNumber> => {
     try {
-        const balance = await getIrysBalance(irysInstance);
-        const difference = (balance > cost) ? new BN(0) : cost.minus(balance);
+        const initialBalance = await getIrysBalance(irysInstance);
+        const fundingAmount = (initialBalance > cost) ? BIG_NUMBER_ZERO : cost.minus(initialBalance);
 
-        return difference;
+        return fundingAmount;
     } catch(error) {
         throw new Error(`Error while calculating funds needed: ${error}`);
     }
@@ -60,15 +62,20 @@ export const getIrysBalance = async (irysInstance: BaseWebIrys): Promise<BigNumb
 
 export const upfrontFundNodeConditional = async (
     irysInstance: BaseWebIrys,
-    amount: BigNumber,
-): Promise<FundResponse> => {
+    cost: BigNumber,
+): Promise<FundResponse | boolean> => {
     try{
-        const fundingAmount = await fundsNeeded(irysInstance, amount);
-        const fundTx = await upfrontFundNode(irysInstance, fundingAmount);
+        const fundingAmount = await fundsNeeded(irysInstance, cost);
+        if (fundingAmount.isGreaterThan(BIG_NUMBER_ZERO)) {
+            const fundTx = await upfrontFundNode(irysInstance, fundingAmount);
 
-        return fundTx;
-    } catch(err) {
-        console.log("Error funding the node conditionally: ", err);
+            return fundTx;
+        }
+
+        return true;
+
+    } catch(error) {
+        throw new Error(`Error funding the node conditionally: ${error.message}`);
     }
 };
 
@@ -77,11 +84,11 @@ export const upfrontFundNode = async (
     amount: BigNumber,
 ): Promise<FundResponse> => {
     try{
-        const fundTx = await irysInstance.fund(amount);
+        const fundTx = await irysInstance.fund(amount, 1.2);
 
         return fundTx;
-    } catch(err) {
-        console.log("Error funding the node: ", err);
+    } catch(error) {
+        throw new Error(`Error funding the node: ${error.message}`);
     }
 };
 
@@ -95,8 +102,8 @@ export const lazyFundNode = async (
         const fundTx = await irysInstance.fund(price);
 
         return fundTx;
-    } catch(err) {
-        console.log("Error funding the node: ", err);
+    } catch(error) {
+        throw new Error(`Error funding the node: ${error}`);
     }
 }
 
@@ -122,9 +129,11 @@ export const uploadFile = async (
 ): Promise<UploadResponse> => {
     try {
         const receipt = await irysInstance.uploadFile(file, { tags: tags });
-        console.log(`File uploaded to https://gateway.irys.xyz/${receipt.id}`);
+        
         return receipt;
     } catch (error) {
-        throw new Error(`Error uploading file to Irys: ${error.message}`);
+        const balance = irysInstance.utils.fromAtomic(await irysInstance.getBalance());
+        const cost = irysInstance.utils.fromAtomic(await irysInstance.getPrice(file.size));
+        throw new Error(`Error uploading file to Irys: ${error.message}. Balance: ${balance}; cost: ${cost}`);
     }
 };

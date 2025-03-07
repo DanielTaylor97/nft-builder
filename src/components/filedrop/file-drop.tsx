@@ -5,6 +5,8 @@ import "./file-drop.css"
 
 const FileDrop = ({
     onFilesSelected,
+    onFilesClear,
+    authensusComplete,
     width,
     height,
 }) => {
@@ -40,6 +42,14 @@ const FileDrop = ({
             onFilesSelected(files);
         },
         [files, onFilesSelected]
+    );
+
+    useEffect(
+        () => {
+            handleRemoveFile(0);
+            onFilesClear();
+        },
+        [authensusComplete, onFilesClear]
     );
 
     return (
