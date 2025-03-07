@@ -9,7 +9,7 @@ const FileDrop = ({
     authensusComplete,
     width,
     height,
-}) => {
+}): React.JSX.Element => {
     const [ files, setFiles ] = useState([]);
 
     const handleDrop = (event) => {

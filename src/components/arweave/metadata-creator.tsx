@@ -20,7 +20,7 @@ export const metadata = (
         "creator-account": "${creator}",
     }
 }`;
-    // "timestamp": ${nftTimestamp},
+    // "timestamp": "${nftTimestamp}",
 
     return metadataStr;
 

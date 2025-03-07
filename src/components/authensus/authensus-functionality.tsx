@@ -3,7 +3,10 @@
 import { useMutation } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import * as anchor from "@coral-xyz/anchor"
+import { useState, useEffect } from 'react'
 
+import { useCluster } from '../cluster/cluster-data-access'
+import { useAnchorProvider } from '../solana/solana-provider'
 import { useTransactionToast } from '../ui/ui-layout'
 import { getIrys } from '../arweave/irys/utils'
 import { MintRpcObject, runMintRpc } from '../nft_builder/mint/mint-data-access'
@@ -14,82 +17,172 @@ import { Cluster } from '../cluster/cluster-data-access'
 import { WalletContextState } from '@solana/wallet-adapter-react'
 
 export type AuthensusResult = {
-    mintSignature: string;
-    dataUploadResult: UploadResponse;
-    metadataUploadResult: UploadResponse;
-    editSignature: string;
+    mintKeypair: anchor.web3.Keypair | null;
+    mintSignature: string | null;
+    dataUploadResult: UploadResponse | null;
+    fileInfo: FileInfo | null;
+    metadataUploadResult: UploadResponse | null;
+    editSignature: string | null;
+    complete: boolean;
 };
 
-export function useAuthensusFunctionality() {
-
-    const authensusToast = useTransactionToast();
-
-    const authensise = useMutation<AuthensusResult, Error, any>({
-        mutationFn: ({ files, wallet, cluster, provider }) => authensus(files, wallet, cluster, provider),
-        onSuccess: ({ mintSignature }) => {
-            authensusToast(mintSignature);
-        },
-        onError: (error) => {
-            toast.error(`Authensus process failed with error ${error}`);
-        },
-    })
-
-    return { authensise };
-
+const EMPTY_RESULT: AuthensusResult = {
+    mintKeypair: null,
+    mintSignature: null,
+    dataUploadResult: null,
+    fileInfo: null,
+    metadataUploadResult: null,
+    editSignature: null,
+    complete: false,
 }
 
-async function authensus(
-    files: [File],
-    wallet: WalletContextState,
-    cluster: Cluster,
-    provider: anchor.AnchorProvider
-  ): Promise<AuthensusResult> {
-
-    const file = files[0];
-
-    const mintRpcObj = getFileInfo(file, wallet);
+const AuthensusButton = (
+    {files, wallet, onResult}:
+    {files: File[], wallet: WalletContextState, onResult: any}
+): React.JSX.Element => {
     
-    // Create a new account keypair as the mint -- every new file upload needs to have a new mint such that is the unique NFT of that mint
-    const mintKeypair = anchor.web3.Keypair.generate();
+    const { cluster } = useCluster();
+    const provider = useAnchorProvider();
 
-    const mintSignature: string = await runMintRpc({
-        mintObj: mintRpcObj,
-        mintKeypair,
-        provider
-    });
+    const { authensise } = useAuthensusFunctionality();
+    const [buttonText, setButtonText] = useState<string>("Authensise");
 
-    const irysInstance = getIrys(cluster, wallet);
+    const [result, setResult] = useState<AuthensusResult>();
 
-    const { dataUploadResult, fileInfo }: { dataUploadResult: UploadResponse, fileInfo: FileInfo } = await uploadDataFn(irysInstance, file);
-
-    const metadataUploadResult: UploadResponse = await createAndUploadMetadataPageFn(
-        irysInstance,
-        mintSignature,
-        fileInfo,
-        `https://gateway.irys.xyz/${dataUploadResult.id}`,
-        mintKeypair.publicKey.toString(),
-        // nftTimestamp,
-        wallet.publicKey.toString()
+    useEffect(
+        () => onResult(result),
+        [result]
     );
 
-    const newUri: string = `https://gateway.irys.xyz/${metadataUploadResult.id}`;
+    function useAuthensusFunctionality() {
+        const authensusToast = useTransactionToast();
+        const authensise = useMutation<void, Error, any>({
+            mutationFn: ({ files, wallet, cluster, provider }) => authensus(files, wallet, cluster, provider),
+            onSuccess: () => {
+                authensusToast(result.mintSignature);
+                setResult(EMPTY_RESULT);
+            },
+            onError: (error) => {
+                toast.error(`Authensus process failed with error ${error}`);
+            },
+        })
+        return { authensise };
+    }
 
-    const editSignature = await runEditRpc({
-        payer: mintRpcObj.creators[0].address as anchor.web3.PublicKey,
-        mintAccount: mintKeypair.publicKey,
-        newUri,
-        provider
-    });
+    async function authensus(
+        files: [File],
+        wallet: WalletContextState,
+        cluster: Cluster,
+        provider: anchor.AnchorProvider
+    ): Promise<void> {
 
-    const result: AuthensusResult = {
-        mintSignature,
-        dataUploadResult,
-        metadataUploadResult,
-        editSignature
-    };
+        const file = files[0];
+        const mintRpcObj = getFileInfo(file, wallet);
 
-    return result;
-}
+        const irysInstance = getIrys(cluster, wallet);
+
+        if(!result.mintSignature) {
+            setResult(EMPTY_RESULT);
+            setButtonText("Minting");
+            
+            // Create a new account keypair as the mint -- every new file upload needs to have a new mint such that is the unique NFT of that mint
+            const mintKeypair = anchor.web3.Keypair.generate();
+
+            const mintSignature: string = await runMintRpc({
+                mintObj: mintRpcObj,
+                mintKeypair,
+                provider
+            });
+
+            setResult({
+                mintKeypair,
+                mintSignature,
+                dataUploadResult: null,
+                fileInfo: null,
+                metadataUploadResult: null,
+                editSignature: null,
+                complete: false
+            });
+        }
+
+        if(!result.dataUploadResult) {
+            setButtonText("Storing");
+
+            const { dataUploadResult, fileInfo }: { dataUploadResult: UploadResponse, fileInfo: FileInfo } = await uploadDataFn(irysInstance, file);
+
+            setResult({
+                mintKeypair: result.mintKeypair,
+                mintSignature: result.mintSignature,
+                dataUploadResult,
+                fileInfo,
+                metadataUploadResult: null,
+                editSignature: null,
+                complete: false
+            });
+        }
+
+        if(!result.metadataUploadResult) {
+            setButtonText("Metadata-ing");
+
+            const metadataUploadResult: UploadResponse = await createAndUploadMetadataPageFn(
+                irysInstance,
+                result.mintSignature,
+                result.fileInfo,
+                `https://gateway.irys.xyz/${result.dataUploadResult.id}`,
+                result.mintKeypair.publicKey.toString(),
+                // nftTimestamp,
+                wallet.publicKey.toString()
+            );
+
+            setResult({
+                mintKeypair: result.mintKeypair,
+                mintSignature: result.mintSignature,
+                dataUploadResult: result.dataUploadResult,
+                fileInfo: result.fileInfo,
+                metadataUploadResult,
+                editSignature: null,
+                complete: false
+            });
+        }
+
+        if(!result.editSignature) {
+            setButtonText("Editing");
+
+            const newUri: string = `https://gateway.irys.xyz/${result.metadataUploadResult.id}`;
+
+            const editSignature = await runEditRpc({
+                payer: mintRpcObj.creators[0].address as anchor.web3.PublicKey,
+                mintAccount: result.mintKeypair.publicKey,
+                newUri,
+                provider
+            });
+
+            setResult({
+                mintKeypair: result.mintKeypair,
+                mintSignature: result.mintSignature,
+                dataUploadResult: result.dataUploadResult,
+                fileInfo: result.fileInfo,
+                metadataUploadResult: result.metadataUploadResult,
+                editSignature,
+                complete: true
+            });
+        }
+        else {
+            // If the edit signature already exists then something has gone wrong and we have not cleared the previous result
+            throw new Error("The cached Authensus State seems not to have been cleared. Nothing to Update!");
+        }
+    }
+
+    return (
+        <button
+          className="btn btn-xs lg:btn-md btn-primary"
+          onClick={() => authensise.mutateAsync({ files, wallet, cluster, provider })}
+          disabled={authensise.isPending || !files || files.length !== 1}
+        >
+          {buttonText}{authensise.isPending && "..."}
+        </button>
+    );
+};
 
 const getFileInfo = (file: File, wallet: WalletContextState): MintRpcObject => {
     try {
@@ -131,3 +224,5 @@ const symbolise = (
 const charsOnly = (str: string): string => {
     return str.split(".")[0].replace(/[^a-zA-Z0-9]/g, '');
 }
+
+export default AuthensusButton
