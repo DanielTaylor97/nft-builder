@@ -59,14 +59,14 @@ const AuthensusButton = (
         const authensise = useMutation<AuthensusResult, Error, any>({
             mutationFn: ({ files, wallet, cluster, provider }) => authensus({ files, wallet, cluster, provider }),
             onSuccess: (res) => {
-                const sig = res.mintSignature;
+                const sig = res.mintKeypair.publicKey.toString();
                 // setResult(EMPTY_RESULT);
                 setButtonText("Authensise");
                 authensusToast(sig);
             },
             onError: (error) => {
                 setButtonText("Authensise");
-                toast.error(`Authensus process failed with error ${error}. Result state: \nmintKeypair: ${result.mintKeypair ? result.mintKeypair.publicKey.toString() : null} \nmintSignature: ${result.mintSignature} \ndataUploadResult: ${result.dataUploadResult ? result.dataUploadResult.timestamp : null} \nfileInfo: ${result.fileInfo ? result.fileInfo.fileType : null} \nmetadataUploadResult: ${result.metadataUploadResult ? result.metadataUploadResult.timestamp : null} \neditSignature: ${result.editSignature} \ncomplete: ${result.complete}`);
+                toast.error(`Authensus process failed with error ${error}.`);
             },
         })
         return { authensise };
