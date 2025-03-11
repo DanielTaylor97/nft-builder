@@ -2,38 +2,43 @@ import React, { useEffect, useState } from 'react'
 import { AiOutlineCloudUpload } from 'react-icons/ai' // AiOutlineCheckCircle, 
 import { MdClear } from 'react-icons/md'
 import "./file-drop.css"
+import { EMPTY_RESULT } from '../authensus/authensus-functionality'
 
 const FileDrop = ({
     onFilesSelected,
     onFilesClear,
+    onSetResult,
     authensusComplete,
     width,
     height,
 }): React.JSX.Element => {
-    const [ files, setFiles ] = useState([]);
+    const [ files, setFiles ] = useState<File[]>([]);
 
     const handleDrop = (event) => {
         event.preventDefault();
         const droppedFiles = event.dataTransfer.files;
 
-        if(droppedFiles.length > 0) {
-            const newFiles = Array.from(droppedFiles);
+        if(droppedFiles.length > 0 && files.length === 0) {
+            const newFiles: File[] = Array.from(droppedFiles);
 
-            setFiles((prevFiles) => [...prevFiles, ...newFiles])
+            setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+            onSetResult(EMPTY_RESULT);  // Clean the result cache in the case of a new file drop
         }
     }
 
-    const handleRemoveFile = (index) => {
+    const handleRemoveFile = (index, wipe) => {
         setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+        if(wipe) {onSetResult(EMPTY_RESULT)}
     };
 
     const handleFileChange = (event) => {
         const selectedFiles = event.target.files;
 
-        if (selectedFiles && selectedFiles.length > 0) {
-            const newFiles = Array.from(selectedFiles);
+        if (selectedFiles && selectedFiles.length == 1 && files.length === 0) {
+            const newFiles: File[] = Array.from(selectedFiles);
 
             setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+            onSetResult(EMPTY_RESULT);  // Clean the result cache in the case of a new file drop
         }
     };
 
@@ -44,9 +49,10 @@ const FileDrop = ({
         [files, onFilesSelected]
     );
 
+    // If the process completes, we want to clear the files but not the result cache
     useEffect(
         () => {
-            handleRemoveFile(0);
+            handleRemoveFile(0, false);
             onFilesClear();
         },
         [authensusComplete, onFilesClear]
@@ -90,7 +96,8 @@ const FileDrop = ({
                                         </p>
                                     </div>
                                     <div className="file-actions">
-                                        <MdClear onClick={() => handleRemoveFile(index)} />
+                                        {/* If the file is manually removed then we also want to clear the cache */}
+                                        <MdClear onClick={() => handleRemoveFile(index, true)} />
                                     </div>
                                 </div>
                             ))}

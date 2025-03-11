@@ -47,20 +47,12 @@ const AuthensusButton = (
     const { authensise } = useAuthensusFunctionality();
     const [buttonText, setButtonText] = useState<string>("Authensise");
 
-    const [result, setResult] = useState(initResult);
-
-    useEffect(
-        () => onResult(result),
-        [result, onResult]
-    );
-
     function useAuthensusFunctionality() {
         const authensusToast = useTransactionToast();
         const authensise = useMutation<AuthensusResult, Error, any>({
             mutationFn: ({ files, wallet, cluster, provider }) => authensus({ files, wallet, cluster, provider }),
             onSuccess: (res) => {
                 const sig = res.mintKeypair.publicKey.toString();
-                // setResult(EMPTY_RESULT);
                 setButtonText("Authensise");
                 authensusToast(sig);
             },
@@ -83,7 +75,7 @@ const AuthensusButton = (
         const irysInstance = getIrys(cluster, wallet);
 
         // Cache the result state in case of failure midway
-        let tempResult: AuthensusResult = result;
+        let tempResult: AuthensusResult = initResult;
 
         try {
             if(!tempResult.mintSignature) {
@@ -176,7 +168,6 @@ const AuthensusButton = (
                 throw new Error("The cached Authensus State seems not to have been cleared. Nothing to Update!");
             }
         } catch(err) {
-            setResult(tempResult);
             onResult(tempResult);
             throw(err);
         }

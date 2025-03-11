@@ -153,7 +153,7 @@ export function useTransactionToast() {
     toast.success(
       <div className={'text-center'}>
         <div className="text-lg">Transaction sent</div>
-        <ExplorerLink path={`tx/${signature}`} label={'View Transaction'} className="btn btn-xs btn-primary" />
+        <ExplorerLink path={`address/${signature}`} label={'View Transaction'} className="btn btn-xs btn-primary" />
       </div>,
     )
   }

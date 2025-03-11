@@ -25,9 +25,9 @@ export function AuthensusCreate(
       <div>
         <AuthensusButton files={files} wallet={wallet} initResult={result} onResult={setResult} />
       </div>
-        {`${result.mintSignature}, ${result.dataUploadResult.id}, ${result.metadataUploadResult.id}, ${result.editSignature}`}
+      <></>
       <div>
-        <FileDrop onFilesSelected={setFiles} onFilesClear={clearFiles} authensusComplete={result.complete} width="300px" height="400px" />
+        <FileDrop onFilesSelected={setFiles} onFilesClear={clearFiles} onSetResult={setResult} authensusComplete={result.complete} width="300px" height="400px" />
       </div>
     </div>
   );
