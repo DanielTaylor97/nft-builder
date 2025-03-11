@@ -60,16 +60,18 @@ const FileDrop = ({
 
     return (
         <section className="file-drop" style={{ width: width, height: height}}>
-            <div className={`document-uploader ${files.length > 0 ? "upload-box active" : "upload-box"}`} onDrop={handleDrop} onDragOver={(event) => event.preventDefault()}>
+            <div
+                className={`document-uploader ${files.length > 0 ? "upload-box active" : "upload-box"}`}
+                onDrop={handleDrop}
+                onDragOver={(event) => event.preventDefault()}
+                title={"15MB limit per file. Supported formats: .JPG, .JPEG, .PNG, .PDF, .TXT"}
+            >
                 <>
                     <div className="upload-info">
                         <AiOutlineCloudUpload />
                         <div>
                             <p>
                                 Drag and Drop your File Here
-                            </p>
-                            <p>
-                                15MB limit per file. Supported formats: .JPG, .JPEG, .PNG, .PDF, .TXT
                             </p>
                         </div>
                     </div>
@@ -78,11 +80,11 @@ const FileDrop = ({
                         hidden
                         id="browse"
                         onChange={handleFileChange}
-                        accept=".jpg,.jpeg,.png,.pdf,.docx,.pptx,.txt,.xlsx"
+                        accept="image/*,video/*,.pdf,.txt,.xlsx,.docx,.pptx"
                         multiple={false}
                     />
                     <label htmlFor="browse" className="browse-btn">
-                        Browse Files
+                        Or Browse Files
                     </label>
                 </>
                 {files.length > 0 && (
