@@ -3,7 +3,7 @@
 import { useMutation } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import * as anchor from "@coral-xyz/anchor"
-import { useState, useEffect, Dispatch, SetStateAction } from 'react'
+import { useState, Dispatch, SetStateAction } from 'react'
 
 import { useCluster } from '../cluster/cluster-data-access'
 import { useAnchorProvider } from '../solana/solana-provider'
