@@ -10,6 +10,7 @@ export const metadata = {
 }
 
 const links: { label: string; path: string }[] = [
+  { label: 'Collections', path: '/collections' },
   { label: 'Account', path: '/account' },
   { label: 'Clusters', path: '/clusters' },
 ]
