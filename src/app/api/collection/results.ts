@@ -1,6 +1,9 @@
-import { getMetadata, getTimestamps } from './metadata'
 import { type PublicKey } from '@solana/web3.js'
+
+import { getMetadata, getTimestamps } from './metadata'
 import { Cluster } from '../../../components/cluster/cluster-data-access'
+import { type AuthensusResult } from '../../../components/authensus/authensus-functionality'
+
 
 export type StoredResult = {
     mint: PublicKey;
@@ -12,17 +15,27 @@ export type StoredResult = {
     size: number;
 }
 
+export async function getHistoricResults(
+    user: PublicKey
+) {
+    //
+}
+
 export async function getResults(
     user: PublicKey,
-    mintAccount: PublicKey,
+    authensusResult: AuthensusResult,
     cluster: Cluster,
 ): Promise<StoredResult> {
     try {
+        const mintAccount = authensusResult.mintKeypair.publicKey;
+
         const { solanaMetadata, customMetadata } = await getMetadata(user, mintAccount, cluster);
         const timestamps = await getTimestamps(cluster, mintAccount, 2);    // There shouldn't be more than 2 transactions on a given mint
 
         // Actually of type ConfirmedSignatureInfo
         const timestamp = timestamps.find((ts) => ts.signature === customMetadata.creationTransaction);
+
+        verifyAgreement(authensusResult, solanaMetadata);
 
         const result: StoredResult = {
             mint: mintAccount,
@@ -37,6 +50,22 @@ export async function getResults(
         return result;
     } catch(error) {
         throw new Error(`Error while getting results: ${error}`);
+    }
+}
+
+// Shouldn't ever be a problem but will keep it here for now as a sanity check
+function verifyAgreement(
+    authensusResult: AuthensusResult,
+    customMetadata: any
+) {
+    if(authensusResult.mintSignature !== customMetadata.creationTransaction){
+        throw new Error(`The result is different from the posted metadata! Mint Tx ${authensusResult.mintSignature} != ${customMetadata.creationTransaction}`);
+    }
+    if(authensusResult.fileInfo.fileHash !== customMetadata.fileHash){
+        throw new Error(`The result is different from the posted metadata! File Hash ${authensusResult.fileInfo.fileHash} != ${customMetadata.fileHash}`);
+    }
+    if(authensusResult.fileInfo.fileSize !== customMetadata.fileSizeBytes){
+        throw new Error(`The result is different from the posted metadata! File Size ${authensusResult.fileInfo.fileSize} != ${customMetadata.fileSizeBytes}`);
     }
 }
 
