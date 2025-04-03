@@ -24,7 +24,7 @@ export default function AuthensusFeature() {
                 </div>
             }
           >
-            <CollectionGrid />
+            <CollectionGrid user={wallet.publicKey} />
           </AppHero>
         </div>
       </div>

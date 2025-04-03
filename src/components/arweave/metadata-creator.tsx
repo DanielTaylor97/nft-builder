@@ -8,16 +8,16 @@ export const metadata = (
     creator: string
 ) => {
     const metadataStr: string = 
-`"root": {
+`{
     "irysFileLocation": "${fileLocation}",
     "data": {
         "type": "${fileType}",
-        "fileSizeBytes": "${fileSizeKb}",
-        "fileHash": "${fileHash}",
+        "fileSizeBytes": ${fileSizeKb},
+        "fileHash": "${fileHash}"
     },
     "nftData": {
         "creationTransaction": "${tokenCreationSignature}",
-        "creatorAccount": "${creator}",
+        "creatorAccount": "${creator}"
     }
 }`;
     // "timestamp": "${nftTimestamp}",

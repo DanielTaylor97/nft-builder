@@ -16,6 +16,8 @@ import { UploadResponse } from '@irys/upload-core/dist/types/types'
 import { Cluster } from '../cluster/cluster-data-access'
 import { WalletContextState } from '@solana/wallet-adapter-react'
 
+export const TEMP_URI = "http://temp-uri.json";
+
 export type AuthensusResult = {
     mintKeypair: anchor.web3.Keypair | null;
     mintSignature: string | null;
@@ -37,11 +39,10 @@ export const EMPTY_RESULT: AuthensusResult = {
 }
 
 const AuthensusButton = (
-    {files, wallet, initResult, onResult}:
-    {files: File[], wallet: WalletContextState, initResult: AuthensusResult, onResult: Dispatch<SetStateAction<AuthensusResult>>}
+    {files, wallet, initResult, cluster, onResult}:
+    {files: File[], wallet: WalletContextState, initResult: AuthensusResult, cluster: Cluster, onResult: Dispatch<SetStateAction<AuthensusResult>>}
 ): React.JSX.Element => {
-    
-    const { cluster } = useCluster();
+
     const provider = useAnchorProvider();
 
     const { authensise } = useAuthensusFunctionality();
@@ -202,7 +203,7 @@ const getFileInfo = (file: File, wallet: WalletContextState): MintRpcObject => {
         const fileInfo: MintRpcObject = {
             name: file.name.length > 10 ? file.name.substring(0, 10) : file.name,
             symbol: symbolise(wallet.publicKey, file.name.length > 0 ? file.name : "file"),
-            uri: "http://temp-uri.json",
+            uri: TEMP_URI,
             creators: creators
         }
 
