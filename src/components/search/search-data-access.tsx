@@ -1,11 +1,8 @@
 'use client';
 
-import { UseQueryResult, useQuery } from '@tanstack/react-query'
-import { PublicKey } from '@solana/web3.js'
-
-import { StoredResult, getFilesByHash } from '../../app/api/collection/results'
+import { getFilesByHash } from '../../app/api/collection/results'
 import keccak256 from 'keccak256';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 
 export function useSearchFiles({ setCollection, setSearchError }){
 
@@ -48,14 +45,4 @@ export function useSearchFiles({ setCollection, setSearchError }){
     []);
 
     return { handleFileSearch, handleHashSearch };
-}
-
-export function useSearch({ hash }) {
-
-    const history = useQuery({
-        queryKey: ['get-hash-results', { endpoint: null, hash: hash }],
-        queryFn: () => getFilesByHash(hash),
-    });
-
-    return history;
 }

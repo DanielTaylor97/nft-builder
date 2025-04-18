@@ -2,7 +2,7 @@
 
 import { useWallet } from '@solana/wallet-adapter-react'
 
-import { FileSearcher } from './search-ui' // , UserSearcher
+import { FileSearcher } from './search-ui'
 import { AppHero, ellipsify } from '../ui/ui-layout'
 import { ExplorerLink } from '../cluster/cluster-ui'
 
