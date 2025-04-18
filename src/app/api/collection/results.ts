@@ -49,7 +49,6 @@ export async function getHistoricResults(
         throw new Error(`Error while fetching historic results: ${response.status}`);
     }
 }
-// 6pzHLto94qhMhuZXhRksYpUG9bneq3dMfNxr9A4RMmA5
 
 export async function getNewResults(
     user: PublicKey,
@@ -85,6 +84,18 @@ export async function getNewResults(
         return result;
     } catch(error) {
         throw new Error(`Error while getting results: ${error}`);
+    }
+}
+
+export async function getFilesByHash(
+    hash: string
+): Promise<StoredResult[]> {
+    const response = await axios.get(`${BACKEND_URL}/hashes/${hash}`);
+
+    if (response.status === 200) {
+        return await convertToResults(response.data);
+    } else {
+        throw new Error(`Error while fetching by hash: ${response.status}`);
     }
 }
 

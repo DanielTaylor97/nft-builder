@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react'
-import FileDrop from '../filedrop/file-drop'
+import { FileDrop } from '../filedrop/file-drop'
 import { WalletContextState } from '@solana/wallet-adapter-react'
 import AuthensusButton, { EMPTY_RESULT, type AuthensusResult } from './authensus-functionality'
 import { addNewResults } from '../../app/api/collection/results'
@@ -40,7 +40,7 @@ export function AuthensusCreate(
       </div>
       <></>
       <div>
-        <FileDrop onFilesSelected={setFiles} onFilesClear={clearFiles} onSetResult={setResult} authensusComplete={result.complete} width="300px" height="400px" />
+        <FileDrop onFilesSelected={setFiles} onFilesClear={clearFiles} onSetResult={setResult} authensusComplete={result.complete} width="300px" height="1200px" />
       </div>
     </div>
   );

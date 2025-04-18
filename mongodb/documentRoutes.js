@@ -4,7 +4,7 @@ const ObjectId = require("mongodb").ObjectId;
 
 let documentRoutes = express.Router();
 
-// Find all
+// Find all for user
 // "http://localhost:3001/documents"
 documentRoutes.route("/documents/:user").get(async (request, response) => {
     let db = database.getDb();
@@ -16,6 +16,22 @@ documentRoutes.route("/documents/:user").get(async (request, response) => {
         response.json(data);    // 'Returns' JSON value to front-end
     } else {
         console.log(`No data found for ${usr}!`);
+        response.json(data);
+    }
+});
+
+// Find all for hash
+// "http://localhost:3001/hashes"
+documentRoutes.route("/hashes/:hash").get(async (request, response) => {
+    let db = database.getDb();
+    const hsh = request.params.hash;
+    let data = await db.collection("Documents").find({ hash: hsh }).toArray();
+
+    if(data.length > 0) {
+        console.log(`Successfully found docs with hash ${hsh}`);
+        response.json(data);    // 'Returns' JSON value to front-end
+    } else {
+        console.log(`No data found with hash ${hsh}!`);
         response.json(data);
     }
 });
