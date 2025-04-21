@@ -40,7 +40,7 @@ export function AuthensusCreate(
       </div>
       <></>
       <div>
-        <FileDrop onFilesSelected={setFiles} onFilesClear={clearFiles} onSetResult={setResult} authensusComplete={result.complete} width="300px" height="1200px" />
+        <FileDrop onFilesSelected={setFiles} onFilesClear={clearFiles} onSetResult={setResult} authensusComplete={result.complete} width="300px" height="350px" />
       </div>
     </div>
   );

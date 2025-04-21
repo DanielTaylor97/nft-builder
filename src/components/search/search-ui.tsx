@@ -34,7 +34,7 @@ export function FileSearcher(): JSX.Element {
     
     return (
         <div>
-            <h2 className="text-2xl font-bold">Search by File or Hash</h2>
+            <h2 className="text-2xl text-center font-bold">Search by File or Hash</h2>
             <button
                 className="btn btn-xs lg:btn-md btn-primary"
                 onClick={() => {
@@ -54,7 +54,7 @@ export function FileSearcher(): JSX.Element {
                     setSubmitType(SubType.Text);
                     clearFiles();
                 }} />
-                <FileDropSearch onFilesSelected={setFiles} submitFile={setSubmitType} clearText={setHashText} onFilesClear={clearFiles} width="300px" height="1200px" />
+                <FileDropSearch onFilesSelected={setFiles} submitFile={setSubmitType} clearText={setHashText} onFilesClear={clearFiles} width="300px" height="350px" />
             </div>
             {searchError && <pre className="alert alert-error">Error: {searchError?.message.toString()}</pre>}
             {collection && (
