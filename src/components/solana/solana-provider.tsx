@@ -1,12 +1,11 @@
 'use client'
 
 import dynamic from 'next/dynamic';
-import { AnchorProvider } from '@coral-xyz/anchor';
+import { AnchorProvider, Wallet } from '@coral-xyz/anchor';
 import { WalletError } from '@solana/wallet-adapter-base';
 import {
-  AnchorWallet,
   useConnection,
-  useWallet,
+  useAnchorWallet,
   ConnectionProvider,
   WalletProvider,
 } from '@solana/wallet-adapter-react';
@@ -38,7 +37,7 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
 
 export function useAnchorProvider() {
   const { connection } = useConnection()
-  const wallet = useWallet()
+  const wallet = useAnchorWallet()
 
-  return new AnchorProvider(connection, wallet as AnchorWallet, { commitment: 'confirmed' })
+  return new AnchorProvider(connection, wallet as Wallet, { commitment: 'confirmed' })
 }

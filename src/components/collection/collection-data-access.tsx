@@ -3,9 +3,9 @@
 import { UseQueryResult, useQuery } from '@tanstack/react-query'
 import { PublicKey } from '@solana/web3.js'
 
-import { StoredResult, getHistoricResults } from '../../app/api/collection/results'
+import { StoredResult, getFileType, getHistoricResults } from '../../app/api/collection/results'
 
-export function useGetMetadata({ user }: { user: PublicKey }): UseQueryResult<StoredResult[], Error> {
+export function useGetMetadata(user: PublicKey): UseQueryResult<StoredResult[], Error> {
 
     const history = useQuery({
         queryKey: ['get-historic-results', { endpoint: null, address: user }],
@@ -13,4 +13,25 @@ export function useGetMetadata({ user }: { user: PublicKey }): UseQueryResult<St
     });
 
     return history;
+}
+
+export function itemise(collectionData: StoredResult[] | null): Promise<{type: string;info: StoredResult;}>[] {
+    try {
+        if(collectionData) {
+            const items = collectionData.map(async (item) => {
+                const obj = {
+                    type: await getFileType(item.metadataLoc),
+                    info: item,
+                };
+
+                return obj;
+            });
+
+            return items;
+        } else {
+            return null;
+        }
+    } catch(error) {
+        throw new Error(`Error while itemising: ${error.message}`);
+    }
 }

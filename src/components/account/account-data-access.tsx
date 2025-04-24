@@ -7,6 +7,7 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
+  Transaction,
   TransactionMessage,
   TransactionSignature,
   VersionedTransaction,
@@ -63,7 +64,7 @@ export function useTransferSol({ address }: { address: PublicKey }) {
     mutationFn: async (input: { destination: PublicKey; amount: number }) => {
       let signature: TransactionSignature = ''
       try {
-        const { transaction, latestBlockhash } = await createTransaction({
+        const { transaction, legacyTransaction, latestBlockhash } = await createTransaction({
           publicKey: address,
           destination: input.destination,
           amount: input.amount,
@@ -71,7 +72,7 @@ export function useTransferSol({ address }: { address: PublicKey }) {
         })
 
         // Send transaction and await for signature
-        signature = await wallet.sendTransaction(transaction, connection)
+        signature = await wallet.sendTransaction(legacyTransaction, connection)
 
         // Send transaction and await for signature
         await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
@@ -144,7 +145,8 @@ async function createTransaction({
   amount: number
   connection: Connection
 }): Promise<{
-  transaction: VersionedTransaction
+  transaction: VersionedTransaction,
+  legacyTransaction: Transaction,
   latestBlockhash: { blockhash: string; lastValidBlockHeight: number }
 }> {
   // Get the latest blockhash to use in our transaction
@@ -168,9 +170,11 @@ async function createTransaction({
 
   // Create a new VersionedTransaction which supports legacy and v0
   const transaction = new VersionedTransaction(messageLegacy)
+  const legacyTransaction = Transaction.populate(messageLegacy);
 
   return {
     transaction,
+    legacyTransaction,
     latestBlockhash,
   }
 }

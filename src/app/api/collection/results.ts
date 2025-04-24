@@ -37,6 +37,27 @@ export async function addNewResults(
     }
 }
 
+export async function getFileType(metadataLoc: string): Promise<string> {
+    try {
+        const response = await fetch(metadataLoc);
+        const metadata = await response.json();
+
+        return metadata.data.type;
+    } catch(error) {
+        throw new Error(`Error while finding the file type: ${error.message}`);
+    }
+}
+
+export async function getFileBuffer(loc: string) {
+    const response = await axios.get(loc, { responseType: 'arraybuffer' });
+
+    if(response.status === 200) {
+        return response.data;
+    } else {
+        throw new Error(`Error while fetching the file: ${response.status}`);
+    }
+}
+
 export async function getHistoricResults(
     user: PublicKey,
     // amount: number

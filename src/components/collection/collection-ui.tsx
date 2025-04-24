@@ -4,9 +4,7 @@ import { useState } from 'react'
 import { useMemo } from 'react'
 import { IconRefresh } from '@tabler/icons-react'
 
-import { ExplorerLink } from '../cluster/cluster-ui'
-import { ellipsify } from '../ui/ui-layout'
-import { useGetMetadata } from './collection-data-access'
+import { itemise, useGetMetadata } from './collection-data-access'
 import { PublicKey } from '@solana/web3.js';
 import { TableComponent } from '../table/table';
 
@@ -15,12 +13,13 @@ export default function CollectionGrid(
     { user: PublicKey }
 ): JSX.Element {
 
-    const collection = useGetMetadata({ user });
+    const collection = useGetMetadata(user);
     const [showAll, setShowAll] = useState(false);
 
     const items = useMemo(() => {
-        if (showAll) return collection.data
-        return collection.data?.slice(0, 5)
+        const its = itemise(collection.data);
+        if (showAll) return its;
+        return its?.slice(0, 5)
     }, [collection.data, showAll])
     
     return (

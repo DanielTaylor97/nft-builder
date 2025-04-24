@@ -1,10 +1,4 @@
 {
-  "browser": {
-    "fs": false,
-    "fs/promises": false,
-    "path": false,
-    "os": false
-  },
   "name": "template-next-tailwind-basic",
   "version": "0.1.0",
   "private": true,
@@ -34,6 +28,8 @@
     "@tanstack/react-query": "^5.51.11",
     "@tanstack/react-query-next-experimental": "^5.51.11",
     "@types/axios": "^0.9.36",
+    "@types/image-thumbnail": "^1.0.4",
+    "@types/pdf-thumbnail": "^1.0.4",
     "arweave": "^1.15.5",
     "axios": "^1.8.4",
     "buffer": "^6.0.3",
@@ -41,12 +37,14 @@
     "daisyui": "^4.12.10",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "image-thumbnail": "^1.0.17",
     "jotai": "^2.9.1",
     "keccak256": "^1.0.6",
     "mongodb": "^6.15.0",
     "next": "^14.2.24",
     "node": "^20.19.0",
     "os": "^0.1.2",
+    "pdf-thumbnail": "^1.0.6",
     "process": "^0.11.10",
     "react": "^18",
     "react-dom": "^18",
@@ -57,7 +55,7 @@
   "devDependencies": {
     "@types/bn.js": "^5.1.0",
     "@types/jest": "^29.0.3",
-    "@types/node": "^20.17.24",
+    "@types/node": "^20.17.30",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
