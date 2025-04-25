@@ -9,7 +9,6 @@ export function runEditRpc(
 ): Promise<string> {
 
   try {
-    // const provider = useAnchorProvider();
     const program = getNftBuilderProgram(provider);
 
     const editSignature = program.methods.edit(newUri)

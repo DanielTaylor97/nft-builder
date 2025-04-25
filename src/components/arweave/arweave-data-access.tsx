@@ -3,10 +3,10 @@
 import { metadata } from './metadata-creator'
 import { upfrontFundNodeConditional, uploadFile } from './irys/utils'
 
-import type { UploadResponse } from '@irys/upload-core/dist/types/types'
+// import type { UploadResponse } from '@irys/upload-core/dist/types/types'
 import { join } from 'path'
 import { unlink, readdir } from 'fs/promises'
-import BaseWebIrys from '@irys/web-upload/dist/types/base'
+import BaseWebIrys from "@irys/web-upload/esm/base"
 import keccak256 from 'keccak256'
 import { Buffer } from 'node:buffer'
 
@@ -21,7 +21,7 @@ export type FileInfo = {
 export async function uploadDataFn(
     irysInstancePromise: Promise<BaseWebIrys>,
     file: File
-): Promise<{ dataUploadResult: UploadResponse; fileInfo: FileInfo; }> {
+): Promise<{ dataUploadResult; fileInfo: FileInfo; }> {
 
     try {
         const irysInstance = await irysInstancePromise;
@@ -77,7 +77,7 @@ export async function createAndUploadMetadataPageFn(
     mintPk: string,
     // nftTimestamp: string,
     creator: string
-): Promise<UploadResponse> {
+) {
 
     try {
         let irysInstance = await irysInstancePromise;

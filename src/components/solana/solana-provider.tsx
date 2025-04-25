@@ -1,5 +1,38 @@
 'use client'
 
+import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
+import {
+  useConnection,
+  useAnchorWallet,
+} from '@solana/wallet-adapter-react'
+import dynamic from 'next/dynamic'
+import { ReactNode } from 'react'
+import { createSolanaDevnet, createSolanaLocalnet, createWalletUiConfig, WalletUi } from '@wallet-ui/react'
+// import '@wallet-ui/tailwind/index.css'
+
+export const WalletButton = dynamic(async () => (await import('@wallet-ui/react')).WalletUiDropdown, {
+  ssr: false,
+})
+export const ClusterButton = dynamic(async () => (await import('@wallet-ui/react')).WalletUiClusterDropdown, {
+  ssr: false,
+})
+
+const config = createWalletUiConfig({
+  clusters: [createSolanaDevnet(), createSolanaLocalnet()],
+})
+
+export function SolanaProvider({ children }: { children: ReactNode }) {
+  return <WalletUi config={config}>{children}</WalletUi>
+}
+
+export function useAnchorProvider() {
+  const { connection } = useConnection()
+  const wallet = useAnchorWallet()
+
+  return new AnchorProvider(connection, wallet as Wallet, { commitment: 'confirmed' })
+}
+
+/*
 import dynamic from 'next/dynamic';
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor';
 import { WalletError } from '@solana/wallet-adapter-base';
@@ -41,3 +74,4 @@ export function useAnchorProvider() {
 
   return new AnchorProvider(connection, wallet as Wallet, { commitment: 'confirmed' })
 }
+*/

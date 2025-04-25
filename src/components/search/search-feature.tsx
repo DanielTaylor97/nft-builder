@@ -1,14 +1,16 @@
 'use client';
 
-import { useWallet } from '@solana/wallet-adapter-react'
+// import { useWallet } from '@solana/wallet-adapter-react'
+import { useWalletUi } from '@wallet-ui/react'
 
 import { FileSearcher } from './search-ui'
-import { AppHero, ellipsify } from '../ui/ui-layout'
+import { AppHero } from '../app-hero'
+import { ellipsify } from '../lib/utils'
 import { ExplorerLink } from '../cluster/cluster-ui'
 
 export default function SearchFeature() {
 
-    const wallet = useWallet();
+    const wallet = useWalletUi();
 
     return (
         <div>
@@ -17,7 +19,7 @@ export default function SearchFeature() {
                     title="Search"
                     subtitle={
                         <div className="my-4">
-                            <ExplorerLink path={`account/${wallet.publicKey}`} label={wallet.publicKey ? ellipsify(wallet.publicKey.toString()) : ""} />
+                            <ExplorerLink address={wallet.account?.address} label={ellipsify(wallet.account?.address)} />
                         </div>
                     }
                 >

@@ -21,7 +21,6 @@ export function runMintRpc(
 ): Promise<string> {
 
   try {
-    // const provider = useAnchorProvider();
     const program = getNftBuilderProgram(provider);
 
     const mintSignature = program.methods.mint(mintObj.name, mintObj.symbol, mintObj.uri, mintObj.creators)

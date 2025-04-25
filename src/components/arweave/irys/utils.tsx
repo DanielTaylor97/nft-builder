@@ -1,8 +1,8 @@
 
 import { WebUploader } from "@irys/web-upload"
 import { WebSolana } from "@irys/web-upload-solana"
-import { BaseWebIrys } from "@irys/web-upload/dist/types/base";
-import type { FundResponse, UploadResponse } from '@irys/upload-core/dist/types/types'
+import BaseWebIrys from "@irys/web-upload/esm/base"
+// import type { FundResponse, UploadResponse } from '@irys/upload-core/dist/types/types'
 import { WalletContextState } from '@solana/wallet-adapter-react'
 import { Cluster, ClusterNetwork } from '../../cluster/cluster-data-access'
 import fs from 'fs';
@@ -63,7 +63,7 @@ export const getIrysBalance = async (irysInstance: BaseWebIrys): Promise<BigNumb
 export const upfrontFundNodeConditional = async (
     irysInstance: BaseWebIrys,
     cost: BigNumber,
-): Promise<FundResponse | boolean> => {
+) => {
     try{
         const fundingAmount = await fundsNeeded(irysInstance, cost);
         if (fundingAmount.isGreaterThan(BIG_NUMBER_ZERO)) {
@@ -80,9 +80,9 @@ export const upfrontFundNodeConditional = async (
 };
 
 export const upfrontFundNode = async (
-    irysInstance: BaseWebIrys,
+    irysInstance,
     amount: BigNumber,
-): Promise<FundResponse> => {
+) => {
     try{
         const fundTx = await irysInstance.fund(amount, 1.2);
 
@@ -93,9 +93,9 @@ export const upfrontFundNode = async (
 };
 
 export const lazyFundNode = async (
-    irysInstance: BaseWebIrys,
+    irysInstance,
     pathToFile: string,
-): Promise<FundResponse> => {
+) => {
     try{
         const { size } = await fs.promises.stat(pathToFile);
         const price = await irysInstance.getPrice(size);
@@ -108,10 +108,10 @@ export const lazyFundNode = async (
 }
 
 export const uploadData = async (
-    irysInstance: BaseWebIrys,
+    irysInstance,
     dataToUpload: string,
     tags: {name: string, value: string}[]
-): Promise<UploadResponse> => {
+) => {
 
     try {
         const receipt = await irysInstance.upload(dataToUpload, { tags: tags });
@@ -126,7 +126,7 @@ export const uploadFile = async (
     irysInstance: BaseWebIrys,
     file: File,
     tags: {name: string, value: string}[]
-): Promise<UploadResponse> => {
+) => {
     try {
         const receipt = await irysInstance.uploadFile(file, { tags: tags });
         

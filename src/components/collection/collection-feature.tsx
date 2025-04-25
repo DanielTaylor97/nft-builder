@@ -1,17 +1,21 @@
 'use client';
 
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletUi } from '@wallet-ui/react';
 
 import CollectionGrid from './collection-ui'
 import { WalletButton } from '../solana/solana-provider';
-import { AppHero, ellipsify } from '../ui/ui-layout';
+import { AppHero } from '../app-hero'
+import { ellipsify } from '../lib/utils'
 import { ExplorerLink } from '../cluster/cluster-ui'
+import { PublicKey } from '@solana/web3.js';
 
 export default function AuthensusFeature() {
 
-  const wallet = useWallet();
+  const wallet = useWalletUi();
 
-  if (wallet.publicKey) {
+  if (wallet.account?.address) {
+
+    const pk = new PublicKey(wallet.account.address);
 
     return (
       <div>
@@ -20,11 +24,11 @@ export default function AuthensusFeature() {
             title="Collection"
             subtitle={
                 <div className="my-4">
-                    <ExplorerLink path={`account/${wallet.publicKey}`} label={ellipsify(wallet.publicKey.toString())} />
+                    <ExplorerLink address={wallet.account?.address} label={ellipsify(wallet.account?.address)} />
                 </div>
             }
           >
-            <CollectionGrid user={wallet.publicKey} />
+            <CollectionGrid user={pk} />
           </AppHero>
         </div>
       </div>
@@ -35,7 +39,7 @@ export default function AuthensusFeature() {
     <div className="max-w-4xl mx-auto">
       <div className="hero py-[64px]">
         <div className="hero-content text-center">
-          <WalletButton className="btn btn-primary" />
+          <WalletButton />
         </div>
       </div>
     </div>

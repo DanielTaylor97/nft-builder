@@ -1,6 +1,5 @@
-import { useMemo, useState } from "react"
 import { ExplorerLink } from "../cluster/cluster-ui"
-import { ellipsify } from "../ui/ui-layout"
+import { ellipsify } from '../lib/utils'
 import { createThumbnailFromUrl } from "../img/file"
 import Image from "next/image"
 
@@ -45,10 +44,10 @@ const InfoPanel = (item) => {
     return (
         <tr>
             <th className="font-mono">
-                <ExplorerLink path={`account/${item.mint.toString()}`} label={ellipsify(item.mint.toString(), 3)} />
+                <ExplorerLink address={item.mint.toString()} label={ellipsify(item.mint.toString(), 3)} />
             </th>
             <td className="font-mono text-right">
-                <ExplorerLink path={`tx/${item.creationTx}`} label={ellipsify(item.creationTx, 3)} />
+                <ExplorerLink transaction={item.creationTx} label={ellipsify(item.creationTx, 3)} />
             </td>
             <td>{item.name}</td>
             <td className="font-mono text-right">
