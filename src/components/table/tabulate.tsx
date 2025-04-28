@@ -3,14 +3,19 @@ import { ExplorerLink } from "../cluster/cluster-ui"
 import { ellipsify } from "../ui/ui-layout"
 import { createThumbnailFromUrl } from "../img/file"
 import Image from "next/image"
+import { StoredResult } from "../../app/api/collection/results"
+import { UseQueryResult } from "@tanstack/react-query"
 
 
-export const Tabulate = ({ items, collection, showAll, setShowAll }): React.JSX.Element => {
+export const Tabulate = (
+    { items, collection, showAll, setShowAll }:
+    { items: Promise<{type: string;info: StoredResult;} | null>[], collection: UseQueryResult<StoredResult[], Error>, showAll, setShowAll }
+): React.JSX.Element => {
     return (
         <table className="table border-4 rounded-lg border-separate border-base-300">
             <tbody>
-                {items?.map((item) => (
-                    <tr key={item.info.mint.toString()}>
+                {items.map(async (item) => (
+                    <tr key={(await item).info.mint.toString()}>
                         <ThumbnailPanel item={item} />
                     </tr>
                 ))}
@@ -28,15 +33,24 @@ export const Tabulate = ({ items, collection, showAll, setShowAll }): React.JSX.
     )
 }
 
-async function ThumbnailPanel(item) {
-    const img = await createThumbnailFromUrl(item.info.location, item.type);
+const ThumbnailPanel = async (
+    {item}:
+    {
+        item: Promise<{
+            type: string;
+            info: StoredResult;
+        }>
+    }
+) => {
+    const itm = await item;
+    const img = await createThumbnailFromUrl(itm.info.location, itm.type);
     const arr = img.toString('base64');
     // btoa(String.fromCharCode(...new Uint8Array(img)))
 
     return (
         <div>
             <Image src={`data:image/png;base64,${arr}`} width={200} height={300} alt=""/>
-            <td title={item.info.mint.toString()}>{item.info.name}</td>
+            <td title={itm.info.mint.toString()}>{itm.info.name}</td>
         </div>
     );
 }

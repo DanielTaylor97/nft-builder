@@ -15,7 +15,7 @@ export function useGetMetadata(user: PublicKey): UseQueryResult<StoredResult[], 
     return history;
 }
 
-export function itemise(collectionData: StoredResult[] | null): Promise<{type: string;info: StoredResult;}>[] {
+export function itemise(collectionData: StoredResult[] | null): Promise<{type: string;info: StoredResult;} | null>[] {
     try {
         if(collectionData) {
             const items = collectionData.map(async (item) => {
