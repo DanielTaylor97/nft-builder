@@ -14,7 +14,7 @@ import { runEditRpc } from '../nft_builder/edit/edit-data-access'
 import { uploadDataFn, createAndUploadMetadataPageFn, FileInfo } from '../arweave/arweave-data-access'
 // import { UploadResponse } from '@irys/upload-core/dist/types/types'
 import { Cluster } from '../cluster/cluster-data-access'
-// import { WalletContextState } from '@solana/wallet-adapter-react'
+import { WalletContextState } from '@solana/wallet-adapter-react'
 
 export const TEMP_URI = "http://temp-uri.json";
 
@@ -40,12 +40,10 @@ export const EMPTY_RESULT: AuthensusResult = {
 
 const AuthensusButton = (
     {files, wallet, initResult, cluster, onResult}:
-    {files: File[], wallet, initResult: AuthensusResult, cluster, onResult: Dispatch<SetStateAction<AuthensusResult>>}
+    {files: File[], wallet: WalletContextState, initResult: AuthensusResult, cluster: Cluster, onResult: Dispatch<SetStateAction<AuthensusResult>>}
 ): React.JSX.Element => {
 
     const provider = useAnchorProvider();
-
-    console.log(`Provider initialised with connection ${provider.connection} and pk ${provider.publicKey} using wallet ${provider.wallet}`);
 
     const { authensise } = useAuthensusFunctionality();
     const [buttonText, setButtonText] = useState<string>("Authensise");
@@ -69,7 +67,7 @@ const AuthensusButton = (
 
     const authensus = async (
         { files, wallet, cluster, provider }:
-        { files: [File], wallet, cluster: Cluster, provider: anchor.AnchorProvider }
+        { files: [File], wallet: WalletContextState, cluster: Cluster, provider: anchor.AnchorProvider }
     ): Promise<AuthensusResult>  => {
 
         const file = files[0];
@@ -130,7 +128,7 @@ const AuthensusButton = (
                     `https://gateway.irys.xyz/${tempResult.dataUploadResult.id}`,
                     tempResult.mintKeypair.publicKey.toString(),
                     // nftTimestamp,
-                    wallet.account.address
+                    wallet.publicKey.toString()
                 );
     
                 tempResult = {
@@ -191,12 +189,12 @@ const AuthensusButton = (
     );
 };
 
-const getFileInfo = (file: File, wallet): MintRpcObject => {
+const getFileInfo = (file: File, wallet: WalletContextState): MintRpcObject => {
     try {
         const creators: [{address: anchor.web3.PublicKey, verified: boolean, share: number}] = 
         [
           {
-            address: new anchor.web3.PublicKey(wallet.account.address),
+            address: wallet.publicKey,
             verified: true,
             share: 100
           }
@@ -204,7 +202,7 @@ const getFileInfo = (file: File, wallet): MintRpcObject => {
 
         const fileInfo: MintRpcObject = {
             name: file.name.length > 10 ? file.name.substring(0, 10) : file.name,
-            symbol: symbolise(wallet.account.address, file.name.length > 0 ? file.name : "file"),
+            symbol: symbolise(wallet.publicKey, file.name.length > 0 ? file.name : "file"),
             uri: TEMP_URI,
             creators: creators
         }
@@ -216,11 +214,11 @@ const getFileInfo = (file: File, wallet): MintRpcObject => {
 }
 
 const symbolise = (
-    user: string,
+    user: anchor.web3.PublicKey,
     fileName: string
 ): string => {
     // User address is guaranteed to have length > 0
-    const prefix = user.substring(0, 3);
+    const prefix = user.toString().substring(0, 3);
 
     const chars = charsOnly(fileName);
     const suffix = chars.length > 0 ? (chars.length > 3 ? chars.substring(0, 3).toUpperCase() : chars.toUpperCase()) : "FIL"

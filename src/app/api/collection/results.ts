@@ -24,7 +24,7 @@ export type StoredResult = {
 export async function addNewResults(
     user: PublicKey,
     authensusResult: AuthensusResult,
-    cluster,
+    cluster: Cluster,
 ) {
     const res = await getNewResults(user, authensusResult, cluster);
 
@@ -74,7 +74,7 @@ export async function getHistoricResults(
 export async function getNewResults(
     user: PublicKey,
     authensusResult: AuthensusResult,
-    cluster,
+    cluster: Cluster,
 ): Promise<StoredResult> {
     try {
         const mintAccount = authensusResult.mintKeypair.publicKey;

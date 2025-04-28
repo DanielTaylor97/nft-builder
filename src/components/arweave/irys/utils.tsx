@@ -2,43 +2,31 @@
 import { WebUploader } from "@irys/web-upload"
 import { WebSolana } from "@irys/web-upload-solana"
 import BaseWebIrys from "@irys/web-upload/esm/base"
+// import type { FundResponse, UploadResponse } from '@irys/upload-core/dist/types/types'
+import { WalletContextState } from '@solana/wallet-adapter-react'
+import { Cluster, ClusterNetwork } from '../../cluster/cluster-data-access'
 import fs from 'fs';
 import { type BigNumber, BigNumber as BN } from 'bignumber.js';
-import { PublicKey } from "@solana/web3.js";
 
 const BIG_NUMBER_ZERO = new BN(0);
 
 export const getIrys = async (
-    cluster,
-    wallet
+    cluster: Cluster,
+    wallet: WalletContextState
 ): Promise<BaseWebIrys> => {
-
-    /*  wallet.account ->
-      address: string,
-      chains: IdentifierArray,
-      features: IdentifierArray,
-      icon: data,
-      label: string,
-      publicKey: readonlyUint8Array
-    */
 
     try {
 
-        // Workaround using wallet-ui useWalletUi instead of anchor useWallet
-        const provider = {
-            publicKey: new PublicKey(wallet.account.address),   // account.publicKey is a readonlyUint8Array
-        }
-
-        if(cluster.cluster === "devnet") {
+        if(cluster.endpoint === ClusterNetwork.Devnet) {
             const irysUploader = await WebUploader(WebSolana)
-                                        .withProvider(provider)
-                                        .withRpc(cluster.cluster)
+                                        .withProvider(wallet)
+                                        .withRpc(cluster.endpoint)
                                         .devnet();
 
             return irysUploader;
         } else {
             const irysUploader = await WebUploader(WebSolana)
-                                        .withProvider(provider);
+                                        .withProvider(wallet);
     
             return irysUploader;
         }
