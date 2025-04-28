@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react'
 
 import { ExplorerLink } from '../cluster/cluster-ui'
-import { ellipsify } from '../lib/utils'
+import { ellipsify } from '../ui/ui-layout'
 import { useSearchFiles } from './search-data-access'
 import { FileDropSearch } from '../filedrop/file-drop'
 import { StoredResult } from '../../app/api/collection/results';
@@ -79,12 +79,12 @@ export function FileSearcher(): JSX.Element {
                                 </thead>
                                 <tbody>
                                     {collection?.map((item) => (
-                                    <tr key={item.mint?.toString()}>
+                                    <tr key={item.mint.toString()}>
                                         <th className="font-mono">
-                                            <ExplorerLink address={item.mint?.toString()} label={ellipsify(item.mint?.toString(), 3)} />
+                                            <ExplorerLink path={`account/${item.mint.toString()}`} label={ellipsify(item.mint.toString(), 3)} />
                                         </th>
                                         <td className="font-mono text-right">
-                                            <ExplorerLink transaction={item.creationTx} label={ellipsify(item.creationTx, 3)} />
+                                            <ExplorerLink path={`tx/${item.creationTx}`} label={ellipsify(item.creationTx, 3)} />
                                         </td>
                                         <td>{item.name}</td>
                                         <td className="font-mono text-right">

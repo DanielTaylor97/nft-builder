@@ -5,14 +5,14 @@ import toast from 'react-hot-toast'
 import * as anchor from "@coral-xyz/anchor"
 import { useState, Dispatch, SetStateAction } from 'react'
 
-// import { useCluster } from '../cluster/cluster-data-access'
+import { useCluster } from '../cluster/cluster-data-access'
 import { useAnchorProvider } from '../solana/solana-provider'
-import { useTransactionToast } from '../use-transaction-toast'
+import { useTransactionToast } from '../ui/ui-layout'
 import { getIrys } from '../arweave/irys/utils'
 import { MintRpcObject, runMintRpc } from '../nft_builder/mint/mint-data-access'
 import { runEditRpc } from '../nft_builder/edit/edit-data-access'
 import { uploadDataFn, createAndUploadMetadataPageFn, FileInfo } from '../arweave/arweave-data-access'
-// import { UploadResponse } from '@irys/upload-core/dist/types/types'
+import { UploadResponse } from '@irys/upload-core/dist/types/types'
 import { Cluster } from '../cluster/cluster-data-access'
 import { WalletContextState } from '@solana/wallet-adapter-react'
 
@@ -21,9 +21,9 @@ export const TEMP_URI = "http://temp-uri.json";
 export type AuthensusResult = {
     mintKeypair: anchor.web3.Keypair | null;
     mintSignature: string | null;
-    dataUploadResult: any | null;
+    dataUploadResult: UploadResponse | null;
     fileInfo: FileInfo | null;
-    metadataUploadResult: any | null;
+    metadataUploadResult: UploadResponse | null;
     editSignature: string | null;
     complete: boolean;
 };
@@ -105,7 +105,7 @@ const AuthensusButton = (
             if(!tempResult.dataUploadResult) {
                 setButtonText("Storing");
     
-                const { dataUploadResult, fileInfo }: { dataUploadResult, fileInfo: FileInfo } = await uploadDataFn(irysInstance, file);
+                const { dataUploadResult, fileInfo }: { dataUploadResult: UploadResponse, fileInfo: FileInfo } = await uploadDataFn(irysInstance, file);
     
                 tempResult = {
                     mintKeypair: tempResult.mintKeypair,
@@ -121,7 +121,7 @@ const AuthensusButton = (
             if(!tempResult.metadataUploadResult) {
                 setButtonText("Metadata-ing");
     
-                const metadataUploadResult = await createAndUploadMetadataPageFn(
+                const metadataUploadResult: UploadResponse = await createAndUploadMetadataPageFn(
                     irysInstance,
                     tempResult.mintSignature,
                     tempResult.fileInfo,
