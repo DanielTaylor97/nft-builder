@@ -3,14 +3,13 @@ import { signerIdentity, publicKey } from '@metaplex-foundation/umi'
 import { fetchDigitalAsset, mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata'
 import { fromWeb3JsPublicKey } from "@metaplex-foundation/umi-web3js-adapters";
 import { type PublicKey, ConfirmedSignatureInfo, Connection } from '@solana/web3.js'
-import { Cluster } from '../../../components/cluster/cluster-data-access'
 
 import { TEMP_URI } from '../../../components/authensus/authensus-functionality'
 
 export async function getMetadata(
     user: PublicKey,
     mint: PublicKey,
-    cluster: Cluster,
+    cluster,
     expectComplete: Boolean,
 ) {
     const maxTries = expectComplete ? 120 : 1;
@@ -22,7 +21,7 @@ export async function getMetadata(
 
         for(let i = 0; i < maxTries; i++){
             // Create the umi instance
-            const umi = createUmi(cluster.endpoint);
+            const umi = createUmi(cluster.cluster);
     
             // Use the MPL Token Metadata plugin
             umi.use(mplTokenMetadata());
@@ -71,12 +70,12 @@ export async function getMetadata(
 /// Gets the transaction list for the provided accounts -- intended to be used to fetch mint account histories for timestamps.
 /// Ordered by transaction timestamp.
 export async function getTimestamps(
-    cluster: Cluster,
+    cluster,
     account: PublicKey,
     numTx: number
 ): Promise<ConfirmedSignatureInfo[]> {
     try {
-        const solanaConnection = new Connection(cluster.endpoint);
+        const solanaConnection = new Connection(cluster.cluster);
         const transactionList = await solanaConnection.getSignaturesForAddress(account, {limit: numTx});
 
         return orderTransactionList(transactionList);

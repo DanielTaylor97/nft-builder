@@ -27,7 +27,7 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
 
 export function useAnchorProvider() {
   const { connection } = useConnection()
-  const wallet = useAnchorWallet()
+  const wallet = useAnchorWallet()  // Not working for some reason
 
   return new AnchorProvider(connection, wallet as Wallet, { commitment: 'confirmed' })
 }

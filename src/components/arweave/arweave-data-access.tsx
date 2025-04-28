@@ -6,9 +6,9 @@ import { upfrontFundNodeConditional, uploadFile } from './irys/utils'
 // import type { UploadResponse } from '@irys/upload-core/dist/types/types'
 import { join } from 'path'
 import { unlink, readdir } from 'fs/promises'
-import BaseWebIrys from "@irys/web-upload/esm/base"
+import BaseWebIrys from '@irys/web-upload/esm/base'
 import keccak256 from 'keccak256'
-import { Buffer } from 'node:buffer'
+import { Buffer } from 'buffer'
 
 const DIRECTORY: string = "../../temp";
 
