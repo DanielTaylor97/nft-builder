@@ -17,9 +17,9 @@ export default function CollectionGrid(
     const [showAll, setShowAll] = useState(false);
 
     const items = useMemo(() => {
-        const its = itemise(collection.data);
-        if (showAll) return its;
-        return its?.slice(0, 5)
+        // const its = itemise(collection.data);
+        if (showAll) return collection.data;
+        return collection.data?.slice(0, 5)
     }, [collection.data, showAll])
     
     return (

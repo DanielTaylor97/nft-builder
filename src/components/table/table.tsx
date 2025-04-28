@@ -2,13 +2,13 @@
 
 import React from "react";
 import { Tabulate } from "./tabulate";
+import { UseQueryResult } from "@tanstack/react-query";
+import { StoredResult } from "../../app/api/collection/results";
 
-export const TableComponent = ({
-    collection,
-    items,
-    showAll,
-    setShowAll
-}): React.JSX.Element => {
+export const TableComponent = (
+    { collection, items, showAll, setShowAll }:
+    { collection: UseQueryResult<StoredResult[], Error>, items: StoredResult[], showAll, setShowAll }
+    ): React.JSX.Element => {
     return (
         <div>
         {collection.isError && <pre className="alert alert-error">Error: {collection.error?.message.toString()}</pre>}

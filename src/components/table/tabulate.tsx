@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react"
 import { ExplorerLink } from "../cluster/cluster-ui"
 import { ellipsify } from "../ui/ui-layout"
 import { createThumbnailFromUrl } from "../img/file"
@@ -9,14 +8,15 @@ import { UseQueryResult } from "@tanstack/react-query"
 
 export const Tabulate = (
     { items, collection, showAll, setShowAll }:
-    { items: Promise<{type: string;info: StoredResult;} | null>[], collection: UseQueryResult<StoredResult[], Error>, showAll, setShowAll }
-): React.JSX.Element => {
+    { collection: UseQueryResult<StoredResult[], Error>, items: StoredResult[], showAll, setShowAll }
+    ): React.JSX.Element => {
     return (
         <table className="table border-4 rounded-lg border-separate border-base-300">
             <tbody>
-                {items.map(async (item) => (
-                    <tr key={(await item).info.mint.toString()}>
-                        <ThumbnailPanel item={item} />
+                {items.map((item) => (
+                    <tr key={item.mint.toString()}>
+                        {/* <ThumbnailPanel item={item} /> */}
+                        <InfoPanel item={item} />
                     </tr>
                 ))}
                 {(collection.data?.length ?? 0) > 5 && (
@@ -55,7 +55,10 @@ const ThumbnailPanel = async (
     );
 }
 
-const InfoPanel = (item) => {
+const InfoPanel = (
+    {item}:
+    {item: StoredResult}
+) => {
     return (
         <tr>
             <th className="font-mono">
